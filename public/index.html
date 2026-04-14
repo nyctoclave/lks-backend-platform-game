@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NexusPlay — Game Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #080b11;
+    --bg-panel: #0e1420;
+    --bg-card: #131926;
+    --bg-hover: #1a2235;
+    --border: #1e2d45;
+    --border-bright: #2a3f5e;
+    --accent: #00c8ff;
+    --accent2: #ff4d6d;
+    --accent3: #7fff6a;
+    --gold: #f5b942;
+    --text-primary: #e8edf5;
+    --text-secondary: #8a9bb5;
+    --text-muted: #4a5a72;
+    --glow-blue: 0 0 20px rgba(0,200,255,0.3);
+    --glow-red: 0 0 20px rgba(255,77,109,0.3);
+    --radius: 6px;
+    --font-head: 'Rajdhani', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated bg grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; min-height: 100vh; position: relative; z-index: 1; }
+  .view.active { display: flex; flex-direction: column; }
+
+  /* ─── AUTH PAGE ─── */
+  #view-auth {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .auth-wrapper {
+    width: 100%;
+    max-width: 420px;
+    animation: slideUp 0.5s ease;
+  }
+
+  .brand {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .brand-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), #0077ff);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: var(--glow-blue);
+  }
+  .brand-name {
+    font-family: var(--font-head);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--text-primary);
+    text-transform: uppercase;
+  }
+  .brand-name span { color: var(--accent); }
+  .brand-tagline {
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+  }
+
+  .auth-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+  .auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .auth-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  .auth-tab {
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    background: none;
+    border: none;
+    position: relative;
+  }
+  .auth-tab.active {
+    color: var(--accent);
+    background: rgba(0,200,255,0.06);
+  }
+  .auth-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .auth-form { padding: 32px; }
+  .auth-form.hidden { display: none; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+  }
+  .form-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 15px;
+    transition: all 0.2s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
+  }
+  .form-input::placeholder { color: var(--text-muted); }
+
+  .hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    border: none;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.05);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .btn:hover::after { opacity: 1; }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, #0077ff 100%);
+    color: #000;
+    width: 100%;
+    box-shadow: var(--glow-blue);
+  }
+  .btn-primary:hover { box-shadow: 0 0 30px rgba(0,200,255,0.5); }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--accent2) 0%, #c01035 100%);
+    color: white;
+    box-shadow: var(--glow-red);
+  }
+  .btn-sm {
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-success {
+    background: linear-gradient(135deg, var(--accent3) 0%, #3aaf2c 100%);
+    color: #000;
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold) 0%, #d4920a 100%);
+    color: #000;
+  }
+
+  /* ─── ALERT ─── */
+  .alert {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .alert.show { display: flex; }
+  .alert-error { background: rgba(255,77,109,0.15); border: 1px solid rgba(255,77,109,0.4); color: #ff8fa5; }
+  .alert-success { background: rgba(127,255,106,0.12); border: 1px solid rgba(127,255,106,0.4); color: #90ffaa; }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    background: rgba(14,20,32,0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-head);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .topbar-brand span { color: var(--accent); }
+  .topbar-nav {
+    display: flex;
+    gap: 4px;
+  }
+  .nav-item {
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: none;
+    border: none;
+  }
+  .nav-item:hover, .nav-item.active {
+    color: var(--accent);
+    background: rgba(0,200,255,0.08);
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    font-family: var(--font-mono);
+  }
+  .user-badge .dot {
+    width: 8px; height: 8px;
+    background: var(--accent3);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--accent3);
+    animation: pulse 2s infinite;
+  }
+  .role-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .role-admin { background: rgba(245,185,66,0.2); color: var(--gold); border: 1px solid rgba(245,185,66,0.4); }
+  .role-user { background: rgba(0,200,255,0.15); color: var(--accent); border: 1px solid rgba(0,200,255,0.3); }
+
+  /* ─── MAIN CONTENT ─── */
+  .main-content {
+    flex: 1;
+    padding: 32px;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    gap: 16px;
+  }
+  .page-title {
+    font-family: var(--font-head);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  .page-subtitle {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  /* ─── STATS GRID ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border-bright); }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+  }
+  .stat-card.blue::before { background: var(--accent); }
+  .stat-card.red::before { background: var(--accent2); }
+  .stat-card.green::before { background: var(--accent3); }
+  .stat-card.gold::before { background: var(--gold); }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: var(--font-head);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-card.blue .stat-value { color: var(--accent); }
+  .stat-card.red .stat-value { color: var(--accent2); }
+  .stat-card.green .stat-value { color: var(--accent3); }
+  .stat-card.gold .stat-value { color: var(--gold); }
+  .stat-icon {
+    position: absolute;
+    top: 16px; right: 16px;
+    font-size: 28px;
+    opacity: 0.3;
+  }
+
+  /* ─── TABLE ─── */
+  .table-wrapper {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .table-title {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .search-input {
+    padding: 8px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+    width: 220px;
+    transition: all 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-muted); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: rgba(0,200,255,0.04); }
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    font-weight: normal;
+  }
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(30,45,69,0.6);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr {
+    transition: background 0.15s;
+    cursor: default;
+  }
+  tbody tr:hover { background: var(--bg-hover); }
+
+  .td-id {
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+  .td-username { font-weight: 600; color: var(--text-primary); }
+  .td-actions { display: flex; gap: 8px; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-bright);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    animation: modalIn 0.25s ease;
+  }
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    border-radius: 12px 12px 0 0;
+  }
+  .modal-head {
+    padding: 24px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-title {
+    font-family: var(--font-head);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .modal-close {
+    width: 32px; height: 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { border-color: var(--accent2); color: var(--accent2); }
+  .modal-body { padding: 24px; }
+  .modal-footer {
+    padding: 0 24px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  /* ─── GAMES GRID ─── */
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .game-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+  .game-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4), var(--glow-blue);
+  }
+  .game-thumb {
+    height: 140px;
+    background: linear-gradient(135deg, #0a1628, #1a2844);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .game-thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.6));
+  }
+  .game-info { padding: 16px; }
+  .game-title {
+    font-family: var(--font-head);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+  }
+  .game-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .game-slug {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-title {
+    font-family: var(--font-head);
+    font-size: 18px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+  }
+  .empty-sub { font-size: 13px; }
+
+  /* ─── LOADING ─── */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(0,200,255,0.3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: inline-block;
+  }
+
+  /* ─── TAG ─── */
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+  }
+  .tag-default { background: rgba(138,155,181,0.15); color: var(--text-secondary); }
+
+  /* ─── SECTION TABS ─── */
+  .section-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+  .section-tab {
+    padding: 10px 20px;
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    position: relative;
+    transition: color 0.2s;
+  }
+  .section-tab.active { color: var(--accent); }
+  .section-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  /* ─── LOADING OVERLAY ─── */
+  .page-loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    flex-direction: column;
+    gap: 20px;
+    transition: opacity 0.4s;
+  }
+  .page-loader.fade-out { opacity: 0; pointer-events: none; }
+  .loader-logo {
+    font-family: var(--font-head);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  .loader-logo span { color: var(--accent); }
+  .loader-bar {
+    width: 200px;
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .loader-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: loadFill 1.2s ease forwards;
+    box-shadow: var(--glow-blue);
+  }
+
+  /* ─── CONFIRM DIALOG ─── */
+  .confirm-modal { max-width: 380px; }
+  .confirm-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
+  .confirm-text {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .confirm-target {
+    text-align: center;
+    font-family: var(--font-mono);
+    color: var(--accent2);
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+  /* ─── TOAST ─── */
+  .toast-container {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .toast {
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: var(--font-body);
+    max-width: 320px;
+    animation: toastIn 0.3s ease;
+    pointer-events: all;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast-success { background: #0d2218; border: 1px solid rgba(127,255,106,0.4); color: #90ffaa; }
+  .toast-error { background: #200a10; border: 1px solid rgba(255,77,109,0.4); color: #ff8fa5; }
+  .toast-info { background: #071824; border: 1px solid rgba(0,200,255,0.4); color: var(--accent); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes loadFill {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 640px) {
+    .topbar { padding: 0 16px; }
+    .main-content { padding: 20px 16px; }
+    .topbar-nav { display: none; }
+    .page-header { flex-direction: column; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  /* Base URL display */
+  .api-base-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    cursor: pointer;
+  }
+  .api-base-display span { color: var(--accent); }
+  .api-base-input {
+    padding: 8px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    outline: none;
+    width: 280px;
+    margin-bottom: 24px;
+    transition: border-color 0.2s;
+  }
+  .api-base-input:focus { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- PAGE LOADER -->
+<div class="page-loader" id="pageLoader">
+  <div class="loader-logo">NEXUS<span>PLAY</span></div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ─── AUTH VIEW ─── -->
+<div class="view active" id="view-auth">
+  <div class="auth-wrapper">
+    <div class="brand">
+      <div class="brand-logo">
+        <div class="brand-icon">🎮</div>
+        <div class="brand-name">NYCTO<span>PLAY</span></div>
+      </div>
+      <div class="brand-tagline">BY: SIRR ILHAM BAIHAQI THE MAGNIFICENT</div>
+    </div>
+
+    <!-- API Base URL config -->
+    <div style="margin-bottom: 24px; text-align: center;">
+      <input type="text" class="api-base-input" id="apiBaseInput" placeholder="http://localhost:8000/api" value="http://localhost:8000/api" />
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-form" id="form-login">
+        <div class="alert alert-error" id="login-error">
+          <span>⚠</span><span id="login-error-msg"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="login-username" placeholder="Masukkan username" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="login-password" placeholder="Masukkan password" autocomplete="current-password" />
+        </div>
+        <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">
+          <span id="loginBtnText">Sign In</span>
+        </button>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-form hidden" id="form-register">
+        <div class="alert alert-error" id="register-error">
+          <span>⚠</span><span id="register-error-msg"></span>
+        </div>
+        <div class="alert alert-success" id="register-success">
+          <span>✓</span><span>Registrasi berhasil! Silakan sign in.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="register-username" placeholder="Min. 4 karakter" />
+          <div class="hint">4–60 karakter</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="register-password" placeholder="Min. 5 karakter" />
+          <div class="hint">5–20 karakter</div>
+        </div>
+        <button class="btn btn-primary" onclick="doRegister()">
+          <span id="registerBtnText">Buat Akun</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── ADMIN DASHBOARD VIEW ─── -->
+<div class="view" id="view-admin">
+  <nav class="topbar">
+    <div class="topbar-brand">
+      <span>🎮</span>NYCTO<span>PLAY</span>
+    </div>
+    <div class="topbar-nav">
+      <button class="nav-item active" id="nav-dashboard" onclick="adminSection('dashboard')">Dashboard</button>
+      <button class="nav-item" id="nav-users" onclick="adminSection('users')">Users</button>
+      <button class="nav-item" id="nav-games-admin" onclick="adminSection('games')">Games</button>
+    </div>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="dot"></div>
+        <span id="adminUsername">admin</span>
+        <span class="role-badge role-admin">Admin</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <!-- DASHBOARD SECTION -->
+    <div id="section-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle">// Overview platform data</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadAdminDashboard()">↻ Refresh</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="stat-users">—</div>
+          <div class="stat-icon">👤</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Total Games</div>
+          <div class="stat-value" id="stat-games">—</div>
+          <div class="stat-icon">🎮</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Platform Status</div>
+          <div class="stat-value" style="font-size:20px; padding-top:6px;">ONLINE</div>
+          <div class="stat-icon">⚡</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div style="color: var(--text-muted); font-family: var(--font-mono); font-size: 12px; letter-spacing: 1px;">
+        📡 API CONNECTED &nbsp;·&nbsp; SANCTUM AUTH &nbsp;·&nbsp; LARAVEL BACKEND
+      </div>
+    </div>
+
+    <!-- USERS SECTION -->
+    <div id="section-users" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">User Management</div>
+          <div class="page-subtitle">// Kelola akun pengguna</div>
+        </div>
+        <button class="btn btn-success btn-sm" onclick="openAddUserModal()">+ Tambah User</button>
+      </div>
+      <div class="table-wrapper">
+        <div class="table-header">
+          <div class="table-title">Daftar Users</div>
+          <input type="text" class="search-input" id="userSearch" placeholder="🔍 Cari username..." oninput="filterUsers()" />
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Dibuat</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="4"><div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-title">Memuat data...</div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GAMES SECTION (ADMIN) -->
+    <div id="section-games-admin" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Game Management</div>
+          <div class="page-subtitle">// Kelola katalog game</div>
+        </div>
+        <button class="btn btn-success btn-sm" onclick="openAddGameModal()">+ Tambah Game</button>
+      </div>
+      <div id="games-admin-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── USER VIEW ─── -->
+<div class="view" id="view-user">
+  <nav class="topbar">
+    <div class="topbar-brand">
+      <span>🎮</span> NEXUS<span>PLAY</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="dot"></div>
+        <span id="userUsername">user</span>
+        <span class="role-badge role-user">Player</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Game Store</div>
+        <div class="page-subtitle">// Jelajahi koleksi game tersedia</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="loadGamesForUser()">↻ Refresh</button>
+    </div>
+    <div id="user-games-content">
+      <div class="empty-state"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODALS ─── -->
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="modal-add-user">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Tambah User</div>
+      <button class="modal-close" onclick="closeModal('modal-add-user')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-error" id="add-user-error">
+        <span>⚠</span><span id="add-user-error-msg"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-input" id="new-user-username" placeholder="Min. 4 karakter" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="new-user-password" placeholder="Min. 5 karakter" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-add-user')">Batal</button>
+      <button class="btn btn-success btn-sm" onclick="submitAddUser()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="modal-edit-user">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Edit User</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-user')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-error" id="edit-user-error">
+        <span>⚠</span><span id="edit-user-error-msg"></span>
+      </div>
+      <input type="hidden" id="edit-user-id" />
+      <div class="form-group">
+        <label class="form-label">Username Baru</label>
+        <input type="text" class="form-input" id="edit-user-username" placeholder="Username" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password Baru</label>
+        <input type="password" class="form-input" id="edit-user-password" placeholder="Password baru" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-edit-user')">Batal</button>
+      <button class="btn btn-gold btn-sm" onclick="submitEditUser()">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD GAME MODAL -->
+<div class="modal-overlay" id="modal-add-game">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Tambah Game</div>
+      <button class="modal-close" onclick="closeModal('modal-add-game')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-error" id="add-game-error">
+        <span>⚠</span><span id="add-game-error-msg"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Judul Game</label>
+        <input type="text" class="form-input" id="new-game-title" placeholder="Min. 3 karakter" />
+        <div class="hint">3–60 karakter</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deskripsi</label>
+        <textarea class="form-input" id="new-game-desc" placeholder="Deskripsi game..." rows="3" style="resize:vertical"></textarea>
+        <div class="hint">Max 200 karakter</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-add-game')">Batal</button>
+      <button class="btn btn-success btn-sm" onclick="submitAddGame()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME DETAIL MODAL -->
+<div class="modal-overlay" id="modal-game-detail">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head">
+      <div class="modal-title" id="detail-game-title"></div>
+      <button class="modal-close" onclick="closeModal('modal-game-detail')">×</button>
+    </div>
+    <div class="modal-body" id="detail-game-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-game-detail')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal confirm-modal">
+    <div class="modal-body" style="padding-top: 32px;">
+      <div class="confirm-icon">🗑️</div>
+      <div class="confirm-text">Yakin ingin menghapus user ini?</div>
+      <div class="confirm-target" id="confirm-target-name"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-confirm')">Batal</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete()">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+let state = {
+  token: null,
+  role: null,   // 'admin' | 'user'
+  username: null,
+  users: [],
+  games: [],
+  deleteTargetId: null,
+  deleteTargetName: null,
+};
+
+function getBase() {
+  return (document.getElementById('apiBaseInput')?.value || 'http://localhost:8000/api').replace(/\/$/, '');
+}
+
+// ─── INIT ───
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('pageLoader').classList.add('fade-out');
+    setTimeout(() => document.getElementById('pageLoader').remove(), 500);
+  }, 1400);
+
+  // Restore session
+  const saved = sessionStorage.getItem('nx_session');
+  if (saved) {
+    try {
+      const s = JSON.parse(saved);
+      state.token = s.token;
+      state.role = s.role;
+      state.username = s.username;
+      showDashboard();
+    } catch(e) {}
+  }
+});
+
+// ─── AUTH TAB SWITCH ───
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
+}
+
+// ─── LOGIN ───
+async function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  hideAlert('login-error');
+
+  if (!username || !password) { showAlert('login-error', 'Username dan password wajib diisi'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  const txt = document.getElementById('loginBtnText');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spinner"></span> Signing in...';
+
+  try {
+    const res = await api('POST', '/v1/auth/signin', { username, password }, false);
+    if (res.status === 'success' && res.token) {
+      state.token = res.token;
+      state.username = username;
+      // Determine role: try admin endpoint
+      try {
+        const adminRes = await fetch(getBase() + '/v1/admin', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${res.token}`
+          }
+        });
+        state.role = adminRes.ok ? 'admin' : 'user';
+      } catch(e) {
+        state.role = 'user';
+      }
+      saveSession();
+      showDashboard();
+      toast('success', `Selamat datang, ${username}!`);
+    } else {
+      showAlert('login-error', res.message || 'Login gagal');
+    }
+  } catch(e) {
+    showAlert('login-error', e.message || 'Tidak dapat terhubung ke server');
+  } finally {
+    btn.disabled = false;
+    txt.textContent = 'Sign In';
+  }
+}
+
+// ─── REGISTER ───
+async function doRegister() {
+  const username = document.getElementById('register-username').value.trim();
+  const password = document.getElementById('register-password').value;
+  hideAlert('register-error');
+  hideAlert('register-success');
+
+  if (!username || !password) { showAlert('register-error', 'Semua field wajib diisi'); return; }
+
+  const txt = document.getElementById('registerBtnText');
+  txt.innerHTML = '<span class="spinner"></span> Mendaftar...';
+
+  try {
+    const res = await api('POST', '/v1/auth/signup', { username, password }, false);
+    if (res.status === 'success') {
+      document.getElementById('register-success').classList.add('show');
+      document.getElementById('register-username').value = '';
+      document.getElementById('register-password').value = '';
+      setTimeout(() => switchAuthTab('login'), 1500);
+    } else {
+      const msg = typeof res.message === 'object' ? Object.values(res.message).flat().join(', ') : (res.message || 'Registrasi gagal');
+      showAlert('register-error', msg);
+    }
+  } catch(e) {
+    showAlert('register-error', e.message || 'Tidak dapat terhubung ke server');
+  } finally {
+    txt.textContent = 'Buat Akun';
+  }
+}
+
+// ─── LOGOUT ───
+async function doLogout() {
+  try { await api('POST', '/v1/auth/signout', null, true); } catch(e) {}
+  state = { token: null, role: null, username: null, users: [], games: [] };
+  sessionStorage.removeItem('nx_session');
+  showView('view-auth');
+  toast('info', 'Berhasil logout');
+}
+
+// ─── SESSION ───
+function saveSession() {
+  sessionStorage.setItem('nx_session', JSON.stringify({ token: state.token, role: state.role, username: state.username }));
+}
+
+function showDashboard() {
+  if (state.role === 'admin') {
+    document.getElementById('adminUsername').textContent = state.username;
+    showView('view-admin');
+    adminSection('dashboard');
+    loadAdminDashboard();
+  } else {
+    document.getElementById('userUsername').textContent = state.username;
+    showView('view-user');
+    loadGamesForUser();
+  }
+}
+
+// ─── ADMIN SECTIONS ───
+function adminSection(sec) {
+  ['dashboard', 'users', 'games-admin'].forEach(s => {
+    document.getElementById(`section-${s}`)?.style && (document.getElementById(`section-${s}`).style.display = s === sec ? 'block' : 'none');
+  });
+  ['nav-dashboard', 'nav-users', 'nav-games-admin'].forEach(n => {
+    const el = document.getElementById(n);
+    if (el) el.classList.toggle('active', n === `nav-${sec}`);
+  });
+  if (sec === 'users') loadUsers();
+  if (sec === 'games') loadGamesAdmin();
+}
+
+async function loadAdminDashboard() {
+  try {
+    const [usersRes, gamesRes] = await Promise.all([
+      api('GET', '/v1/users', null, true),
+      api('GET', '/v1/games', null, true),
+    ]);
+    document.getElementById('stat-users').textContent = usersRes.totalelements ?? '?';
+    document.getElementById('stat-games').textContent = gamesRes.totalelements ?? '?';
+  } catch(e) {
+    toast('error', 'Gagal memuat dashboard: ' + e.message);
+  }
+}
+
+// ─── USERS ───
+let allUsers = [];
+async function loadUsers() {
+  document.getElementById('users-tbody').innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="spinner"></div></div></td></tr>`;
+  try {
+    const res = await api('GET', '/v1/users', null, true);
+    allUsers = res.data || [];
+    renderUsers(allUsers);
+  } catch(e) {
+    toast('error', 'Gagal memuat users: ' + e.message);
+  }
+}
+
+function renderUsers(users) {
+  const tbody = document.getElementById('users-tbody');
+  if (!users.length) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">Belum ada user</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td class="td-id">#${u.id}</td>
+      <td class="td-username">
+        <span style="margin-right:8px">👤</span>${u.username}
+      </td>
+      <td style="color:var(--text-muted);font-size:12px;font-family:var(--font-mono)">${formatDate(u.created_at)}</td>
+      <td class="td-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openEditUserModal(${u.id}, '${escHtml(u.username)}')">✏ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${u.id}, '${escHtml(u.username)}')">🗑</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterUsers() {
+  const q = document.getElementById('userSearch').value.toLowerCase();
+  renderUsers(allUsers.filter(u => u.username.toLowerCase().includes(q)));
+}
+
+function openAddUserModal() {
+  document.getElementById('new-user-username').value = '';
+  document.getElementById('new-user-password').value = '';
+  hideAlert('add-user-error');
+  openModal('modal-add-user');
+}
+
+async function submitAddUser() {
+  const username = document.getElementById('new-user-username').value.trim();
+  const password = document.getElementById('new-user-password').value;
+  hideAlert('add-user-error');
+  if (!username || !password) { showAlert('add-user-error', 'Semua field wajib diisi'); return; }
+  try {
+    const res = await api('POST', '/v1/users', { username, password }, true);
+    if (res.status === 'success') {
+      closeModal('modal-add-user');
+      toast('success', `User "${res.username}" berhasil ditambahkan`);
+      loadUsers();
+      loadAdminDashboard();
+    } else {
+      const msg = typeof res.message === 'object' ? Object.values(res.message).flat().join(', ') : (res.message || 'Gagal menambah user');
+      showAlert('add-user-error', msg);
+    }
+  } catch(e) {
+    showAlert('add-user-error', e.message);
+  }
+}
+
+function openEditUserModal(id, username) {
+  document.getElementById('edit-user-id').value = id;
+  document.getElementById('edit-user-username').value = username;
+  document.getElementById('edit-user-password').value = '';
+  hideAlert('edit-user-error');
+  openModal('modal-edit-user');
+}
+
+async function submitEditUser() {
+  const id = document.getElementById('edit-user-id').value;
+  const username = document.getElementById('edit-user-username').value.trim();
+  const password = document.getElementById('edit-user-password').value;
+  hideAlert('edit-user-error');
+  if (!username || !password) { showAlert('edit-user-error', 'Semua field wajib diisi'); return; }
+  try {
+    const res = await api('PUT', `/v1/users/${id}`, { username, password }, true);
+    if (res.status === 'succes' || res.status === 'success') {
+      closeModal('modal-edit-user');
+      toast('success', `User berhasil diupdate`);
+      loadUsers();
+    } else {
+      showAlert('edit-user-error', res.message || 'Gagal mengupdate');
+    }
+  } catch(e) {
+    showAlert('edit-user-error', e.message);
+  }
+}
+
+function openDeleteModal(id, username) {
+  state.deleteTargetId = id;
+  state.deleteTargetName = username;
+  document.getElementById('confirm-target-name').textContent = username;
+  openModal('modal-confirm');
+}
+
+async function confirmDelete() {
+  try {
+    await api('DELETE', `/v1/users/${state.deleteTargetId}`, null, true);
+    closeModal('modal-confirm');
+    toast('success', `User "${state.deleteTargetName}" dihapus`);
+    loadUsers();
+    loadAdminDashboard();
+  } catch(e) {
+    toast('error', 'Gagal menghapus: ' + e.message);
+    closeModal('modal-confirm');
+  }
+}
+
+// ─── GAMES ───
+async function loadGamesAdmin() {
+  const container = document.getElementById('games-admin-content');
+  container.innerHTML = `<div class="empty-state"><div class="spinner"></div></div>`;
+  try {
+    const res = await api('GET', '/v1/games', null, true);
+    const games = res.data || [];
+    if (!games.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">🎮</div><div class="empty-title">Belum ada game</div><div class="empty-sub">Tambah game pertama Anda</div></div>`;
+      return;
+    }
+    container.innerHTML = `<div class="games-grid">${games.map(g => gameCardHTML(g, true)).join('')}</div>`;
+  } catch(e) {
+    toast('error', 'Gagal memuat games: ' + e.message);
+    container.innerHTML = '';
+  }
+}
+
+async function loadGamesForUser() {
+  const container = document.getElementById('user-games-content');
+  container.innerHTML = `<div class="empty-state"><div class="spinner"></div></div>`;
+  try {
+    const res = await api('GET', '/v1/games', null, true);
+    const games = res.data || [];
+    if (!games.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">🎮</div><div class="empty-title">Belum ada game tersedia</div><div class="empty-sub">Tunggu update selanjutnya</div></div>`;
+      return;
+    }
+    container.innerHTML = `<div class="games-grid">${games.map(g => gameCardHTML(g, false)).join('')}</div>`;
+  } catch(e) {
+    toast('error', 'Gagal memuat games: ' + e.message);
+    container.innerHTML = '';
+  }
+}
+
+const gameEmojis = ['🎮', '🕹️', '⚔️', '🚀', '🏆', '🐉', '🧩', '🌟', '🔥', '💎'];
+function getEmoji(slug) {
+  let h = 0;
+  for (let c of (slug||'')) h = (h * 31 + c.charCodeAt(0)) | 0;
+  return gameEmojis[Math.abs(h) % gameEmojis.length];
+}
+
+function gameCardHTML(g, isAdmin) {
+  return `
+    <div class="game-card" onclick="showGameDetail('${escHtml(g.slug)}', ${isAdmin})">
+      <div class="game-thumb">${getEmoji(g.slug)}</div>
+      <div class="game-info">
+        <div class="game-title">${escHtml(g.title)}</div>
+        <div class="game-desc">${escHtml(g.description)}</div>
+        <div class="game-slug">${g.slug}</div>
+      </div>
+    </div>`;
+}
+
+async function showGameDetail(slug, isAdmin) {
+  document.getElementById('detail-game-title').textContent = slug;
+  document.getElementById('detail-game-body').innerHTML = `<div class="empty-state"><div class="spinner"></div></div>`;
+  openModal('modal-game-detail');
+  try {
+    const res = await api('GET', `/v1/games/${slug}`, null, true);
+    const g = Array.isArray(res) ? res[0] : res;
+    document.getElementById('detail-game-title').textContent = g.title || slug;
+    document.getElementById('detail-game-body').innerHTML = `
+      <div style="text-align:center; font-size:64px; margin-bottom:16px">${getEmoji(slug)}</div>
+      <div style="color:var(--text-secondary); line-height:1.8; font-size:14px; margin-bottom:16px">${escHtml(g.description || '—')}</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:12px; font-family:var(--font-mono)">
+        <div><div style="color:var(--text-muted)">ID</div><div style="color:var(--accent)">#${g.id}</div></div>
+        <div><div style="color:var(--text-muted)">SLUG</div><div style="color:var(--accent)">${g.slug}</div></div>
+        <div><div style="color:var(--text-muted)">DIBUAT</div><div>${formatDate(g.created_at)}</div></div>
+        <div><div style="color:var(--text-muted)">THUMBNAIL</div><div>${g.thumbnail || 'N/A'}</div></div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('detail-game-body').innerHTML = `<div class="alert alert-error show"><span>⚠</span><span>${e.message}</span></div>`;
+  }
+}
+
+function openAddGameModal() {
+  document.getElementById('new-game-title').value = '';
+  document.getElementById('new-game-desc').value = '';
+  hideAlert('add-game-error');
+  openModal('modal-add-game');
+}
+
+async function submitAddGame() {
+  const title = document.getElementById('new-game-title').value.trim();
+  const description = document.getElementById('new-game-desc').value.trim();
+  hideAlert('add-game-error');
+  if (!title || !description) { showAlert('add-game-error', 'Semua field wajib diisi'); return; }
+  try {
+    const res = await api('POST', '/v1/games', { title, description }, true);
+    if (res.status === 'success') {
+      closeModal('modal-add-game');
+      toast('success', `Game "${title}" berhasil ditambahkan`);
+      loadGamesAdmin();
+      loadAdminDashboard();
+    } else {
+      const msg = typeof res.message === 'object' ? Object.values(res.message).flat().join(', ') : (res.message || 'Gagal menambah game');
+      showAlert('add-game-error', msg);
+    }
+  } catch(e) {
+    showAlert('add-game-error', e.message);
+  }
+}
+
+// ─── API HELPER ───
+async function api(method, path, body, withAuth) {
+  const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+  if (withAuth && state.token) headers['Authorization'] = `Bearer ${state.token}`;
+  const opts = { method, headers };
+  if (body && method !== 'GET') opts.body = JSON.stringify(body);
+  const res = await fetch(getBase() + path, opts);
+  if (res.status === 204) return {};
+  const data = await res.json();
+  if (!res.ok && res.status === 401) throw new Error('Tidak terautentikasi');
+  return data;
+}
+
+// ─── UI HELPERS ───
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
+});
+
+function showAlert(id, msg) {
+  const el = document.getElementById(id);
+  const msgEl = document.getElementById(id + '-msg');
+  if (el) { el.classList.add('show'); if (msgEl) msgEl.textContent = msg; }
+}
+function hideAlert(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+
+function toast(type, message) {
+  const container = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  el.innerHTML = `<span>${icons[type]||'ℹ'}</span><span>${message}</span>`;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(20px)';
+    el.style.transition = 'all 0.3s';
+    setTimeout(() => el.remove(), 300);
+  }, 3500);
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  return new Date(str).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const activeForm = document.querySelector('#form-login:not(.hidden)');
+    if (activeForm) doLogin();
+    const activeReg = document.querySelector('#form-register:not(.hidden)');
+    if (activeReg) doRegister();
+  }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+  }
+});
+</script>
+</body>
+</html>
